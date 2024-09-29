@@ -80,7 +80,7 @@ from .Models.config import (
     LoggingSettings,
     Testing,
     DetectionResults,
-    Result, ZMTag,
+    Result, ZMTag, ZMEventsTags,
 )
 
 from .Log import CLIENT_LOGGER_NAME, CLIENT_LOG_FORMAT, BufferedLogHandler
@@ -2424,7 +2424,7 @@ class ZMClient:
                         
                 if not tag.Id in event_tags_by_tagid :
                     # add the detected tag
-                    new_event_tage = EventsTags(
+                    new_event_tage = ZMEventsTags(
                         TagId = tag.Id, EventId = g.eid,
                         AssignedBy = None if g.user_id is None else g.user_id,
                         AssignedDate = datetime.now(),
