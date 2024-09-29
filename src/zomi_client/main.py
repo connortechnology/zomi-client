@@ -2424,7 +2424,7 @@ class ZMClient:
                         
                 if not tag.Id in event_tags_by_tagid :
                     # add the detected tag
-                    new_event_tage = EventTag(
+                    new_event_tage = EventsTags(
                         TagId = tag.Id, EventId = g.eid,
                         AssignedBy = None if g.user_id is None else g.user_id,
                         AssignedDate = datetime.now(),
