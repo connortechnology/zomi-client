@@ -10,7 +10,7 @@ from typing import Optional, Union, Tuple, TYPE_CHECKING, Any, Dict, List, Named
 
 from pydantic import SecretStr
 
-from sqlalchemy import MetaData, create_engine, select, Column, Integer, ForeignKey, String, DateTime, delete, insert
+from sqlalchemy import MetaData, create_engine, select, Column, BigInteger, Integer, ForeignKey, String, DateTime, delete, insert
 from sqlalchemy.dialects.mysql import VARCHAR, TIMESTAMP
 from sqlalchemy.engine import Engine, Connection, CursorResult, ResultProxy
 from sqlalchemy.exc import SQLAlchemyError
@@ -31,15 +31,15 @@ Base = declarative_base()
 
 class DBEventsTags(Base):
     __tablename__ = 'Events_Tags'
-    TagId = Column(Integer, ForeignKey('Tags.Id'), primary_key=True)
-    EventId = Column(Integer, ForeignKey('Events.Id'), primary_key=True)
+    TagId = Column(BigInteger, ForeignKey('Tags.Id'), primary_key=True)
+    EventId = Column(BigInteger, ForeignKey('Events.Id'), primary_key=True)
     AssignedDate = Column(TIMESTAMP)
     AssignedBy = Column(Integer)
 
 
 class DBZMTag(Base):
     __tablename__ = 'Tags'
-    Id = Column(Integer, primary_key=True)
+    Id = Column(BigInteger, primary_key=True)
     Name = Column(VARCHAR(64))
     CreateDate = Column(TIMESTAMP)
     CreatedBy = Column(Integer)
@@ -212,19 +212,19 @@ class ZMDB:
                 #AssignedDate=datetime.now()
             #)
             self.connection.execute(_insert)
-        self.connection.commit()
+            self.connection.commit()
 
     def add_event_tags(self, eid: int, tags: List[ZMEventTag]):
         """
         Insert new tags. tags should be a list of EventTag objects.
         """
         for tag in tags:
-            _insert = insert(DBEventsTags).values(tag)
-                #EventId=eid,
-                #TagId=tag.Id,
-                #AssignedBy=None if g.user_id is None else g.user_id,
-                #AssignedDate=datetime.now()
-            #)
+            _insert = insert(DBEventsTags).values(
+                EventId=eid,
+                TagId=tag.TagId,
+                AssignedBy=tag.AssignedBy,
+                AssignedDate=tag.AssignedDate,
+            )
             self.connection.execute(_insert)
         self.connection.commit()
 
