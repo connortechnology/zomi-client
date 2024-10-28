@@ -2409,14 +2409,13 @@ class ZMClient:
                 if not _l in tags_by_name :
                     # Create a new Tag and add it to tags
                     new_tag = ZMTag(
-                        Name=objdet_tag_name,
-                        CreateDate=now,
-                        CreatedBy=None if g.user_id is None else g.user_id,
-                        LastAssignedDate=datetime.now(),
+                        Name = _l,
+                        CreateDate = datetime.now(),
+                        CreatedBy = None if g.user_id is None else g.user_id,
+                        LastAssignedDate = datetime.now(),
                     )
-                    logger.debug(f"{lp} attempting to add tag: {new_tag.Name}")
+                    logger.debug(f"{lp} attempting to add tag: {new_tag.Name} {new_tag.CreateDate}")
                     new_tag = g.db.create_tag(new_tag)
-                    all_tags[new_tag.Id] = new_tag
                     tags_by_name[_l] = new_tag
                     tags_by_id[new_tag.Id] = new_tag
 
@@ -2430,8 +2429,10 @@ class ZMClient:
                         AssignedDate = datetime.now(),
                         )
                     new_event_tags.append(new_event_tag)
+                    event_tags_by_tagid[tag.Id] = new_event_tag
 
             if new_event_tags:
+                logger.debug(f"{lp} attempting to add tag: {new_event_tags}")
                 g.db.add_event_tags(g.eid, new_event_tags)
 
         # send notifications
