@@ -67,7 +67,10 @@ class PipeLine:
             else:
                 self.event_tot_frames = len(g.Frame)
                 self.event_end_datetime = g.db.end_datetime_from_eid(g.eid)
+                if not self.event_end_datetime:
+                    self.event_end_datetime = datetime.now()
                 self.start_datetime = g.db.start_datetime_from_eid(g.eid)
+
                 self.event_tot_seconds = g.Event.get(
                     "Length",
                     (self.event_end_datetime - self.start_datetime).total_seconds(),
