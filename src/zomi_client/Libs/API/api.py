@@ -455,7 +455,7 @@ class ZMAPI:
                         "data":{
                             "name":"Could not retrieve user te details",
                             "message":"Could not retrieve user te details",
-                            "url":"\/zm\/api\/host\/login.json",
+                            "url":"{url}",
                             "exception":{
                                 "class":"UnauthorizedException",
                                 "code":401,"message":"Could not retrieve user te details"
@@ -467,7 +467,7 @@ class ZMAPI:
                         "data":{
                             "name":"Login denied for user &quot;testapi&quot;",
                             "message":"Login denied for user &quot;testapi&quot;",
-                            "url":"\/zm\/api\/host\/login.json",
+                            "url":"{url}",
                             "exception":{
                                 "class":"UnauthorizedException",
                                 "code":401,
