@@ -121,6 +121,11 @@ class ZMSPullMethod(DefaultNotEnabled):
         description="Seconds between frame grabs for LIVE events"
         " (1 would = 1 fps, 2 = .5 fps).",
     )
+    skip_frames: Optional[int] = Field(
+        None,
+        description="Frame increment for PAST events"
+        "",
+    )
     url: Optional[AnyUrl] = Field(
         None,
         description="URL to the nph-zms cgi script (ex: http://zm.example.com/zm/cgi-bin/nph-zms). If not supplied it will be auto-detected.",
@@ -453,6 +458,7 @@ class DetectionSettings(BaseModel):
             model: Optional[Models] = Field(default_factory=Models)
 
             confidence: Optional[bool] = Field(True)
+            save_all: Optional[bool] = Field(True)
 
         class Training(DefaultEnabled):
             enabled: Optional[bool] = Field(False)
@@ -607,6 +613,14 @@ class ZMEventsTags(BaseModel):
     EventId: int
     AssignedDate: Optional[datetime] = None
     AssignedBy: Optional[int] = None
+
+class ZMEventData(BaseModel):
+    Id: Optional[int] = None
+    MonitorId: Optional[int] = None
+    FrameId: int
+    EventId: int
+    Timestamp: Optional[datetime] = None
+    Data: Optional[str] = None
 
 class ConfigFileModel(BaseModel):
     testing: Testing = Field(default_factory=Testing)

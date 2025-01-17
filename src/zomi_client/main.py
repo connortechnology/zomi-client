@@ -80,7 +80,7 @@ from .Models.config import (
     LoggingSettings,
     Testing,
     DetectionResults,
-    Result, ZMTag, ZMEventsTags,
+    Result, ZMTag, ZMEventsTags,ZMEventData
 )
 
 from .Log import CLIENT_LOGGER_NAME, CLIENT_LOG_FORMAT, BufferedLogHandler
@@ -917,7 +917,7 @@ class ZMClient:
         # Use an async generator to get images from the image pipeline
         break_out: bool = False
         image_start = time.time()
-        async for image, image_name in self.image_pipeline.generate_image():
+        async for image, frame_id, image_name in self.image_pipeline.generate_image():
             image_loop += 1
             if g.config.detection_settings.images.debug.enabled:
                 logger.debug(f"{lp} Debug image configured, saving image to disk")
@@ -948,7 +948,6 @@ class ZMClient:
                 else:
                     logger.warning(f"{lp} Debug image failed to write to disk.")
                 del debug_image
-
 
             if break_out is True:
                 logger.debug(
@@ -1155,7 +1154,7 @@ class ZMClient:
                 )
             else:
                 logger.info(
-                    f"{LP} This is a past event, not post processing or writing static_object data"
+                    f"{LP} This is a past event, not writing static_object data"
                 )
             # always post process
             await self.post_process(matched)
@@ -2244,6 +2243,7 @@ class ZMClient:
         image: np.ndarray = matches["frame_img"]
         prepared_image = image.copy()
         image_name = str(matches["frame_id"])
+        frame_id = matches["frame_id"]
         # annotate the image
         lp = f"post process::"
         from .Models.utils import draw_bounding_boxes
@@ -2279,6 +2279,19 @@ class ZMClient:
                 write_processor=write_processor,
             )
 
+        if g.config.detection_settings.images.annotation.save_all:
+            jpg_file = g.event_path / (image_name + "-object.jpg")
+            try:
+                objdetect_jpg = cv2.imwrite(jpg_file.as_posix(), prepared_image)
+            except Exception as write_img_exc:
+                logger.error(
+                    f"{lp} {jpg_file} failed to write to disk: err_msg=> \n{write_img_exc}\n"
+                )
+            else:
+                if objdetect_jpg:
+                    logger.debug(f"{lp} objdetect.jpg written to disk @ '{jpg_file}'")
+                else:
+                    logger.warning(f"{lp} objdetect.jpg failed to write to disk.")
 
         jpg_file = g.event_path / "objdetect.jpg"
         object_file = g.event_path / "objects.json"
@@ -2295,7 +2308,7 @@ class ZMClient:
                 logger.warning(f"{lp} objdetect.jpg failed to write to disk.")
 
         obj_json = {
-            "frame_id": image_name,
+            "frame_id": frame_id,
             "labels": labels,
             "confidences": scores,
             "boxes": boxes,
@@ -2310,8 +2323,10 @@ class ZMClient:
         else:
             logger.debug(f"{lp} objects.json written to disk @ '{object_file}'")
 
-        _frame_id = matches["frame_id"]
-        prefix = f"[{_frame_id}] "
+
+        g.db.add_event_data(g.eid, g.mid, frame_id, json.dumps(obj_json))
+
+        prefix = f"[{frame_id}] "
         model_names: list = matches["model_names"]
         # Construct the prediction text
         seen = []

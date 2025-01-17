@@ -11,7 +11,7 @@ from typing import Optional, Union, Tuple, TYPE_CHECKING, Any, Dict, List, Named
 from pydantic import SecretStr
 
 from sqlalchemy import MetaData, create_engine, select, Column, BigInteger, Integer, ForeignKey, String, DateTime, delete, insert
-from sqlalchemy.dialects.mysql import VARCHAR, TIMESTAMP
+from sqlalchemy.dialects.mysql import VARCHAR, TIMESTAMP, LONGTEXT
 from sqlalchemy.engine import Engine, Connection, CursorResult, ResultProxy
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import declarative_base
@@ -36,6 +36,13 @@ class DBEventsTags(Base):
     AssignedDate = Column(TIMESTAMP)
     AssignedBy = Column(Integer)
 
+class DBEventData(Base):
+    __tablename__ = 'Event_Data'
+    MonitorId = Column(Integer, ForeignKey('Monitors.Id'), primary_key=True)
+    FrameId = Column(Integer, ForeignKey('Frames.FrameId'), primary_key=False)
+    EventId = Column(BigInteger, ForeignKey('Events.Id'), primary_key=True)
+    Timestamp = Column(TIMESTAMP)
+    Data = Column(LONGTEXT)
 
 class DBZMTag(Base):
     __tablename__ = 'Tags'
@@ -125,6 +132,17 @@ class ZMDB:
         ).values(Notes=notes)
         self.connection.execute(_update)
         self.connection.commit()
+
+    def add_event_data(self, eid: int, monitor_id: int, frame_id: int, data: str):
+        stmt = insert(DBEventData).values(
+                EventId = eid,
+                MonitorId = monitor_id,
+                FrameId = frame_id,
+                Data = data
+                )
+        result: CursorResult = self.connection.execute(stmt)
+        self.connection.commit()
+        return result.inserted_primary_key[0]
 
     def get_tags(self) -> Dict[int, ZMTag]:
         """
