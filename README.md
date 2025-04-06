@@ -1,33 +1,17 @@
-## Please support ZoneMinder if you can!
-If you use software from the [ZoneMinder organization](https://github.com/ZoneMinder)
-please consider [sponsoring ZoneMinder](https://github.com/sponsors/ZoneMinder). ZoneMinder has been free with
-a paid support option and paid bounties but, ZoneMinder Org needs help with bringing cash flow in. If you have the means, please consider sponsoring ZoneMinder, Thanks!
-
-To clarify; I do not receive any of the funds, it goes strictly to the main developer of ZM.
+# Development has been moved to a private repo, this repo will be archived.
 
 # ZoneMinder Machine Learning Client (ZoMi ML Client)
-### NOTE
-__*YOU MUST UPGRADE PIP before attempting to install anything in this repo!*__
-
-:warning: 
-**This software is currently in ALPHA stage, expect issues.**
-:warning:
+>[!CAUTION]
+> :warning: This software is in **ALPHA** stage, expect issues and incomplete, unoptimized, janky code ;) :warning:
 
 This is a project aiming to update how [ZoneMinder](https://github.com/ZoneMinder/zoneminder) Object Detection works.
 A server and client are supplied to allow for easy integration with ZoneMinder or works of software based on ZM.
 
-## Upgrade Pip
-```bash
-# System wide
-sudo python3 -m pip install --upgrade pip
-# User
-python3 -m pip install --upgrade pip
-```
+This repo is not associated with the ZoneMinder organization or any of its members.
 
 ## Thanks
 
 - [@pliablepixels](https://github.com/pliablepixels) for [zmNinja](https://github.com/ZoneMinder/zmNinja), [zmeventnotification](https://github.com/ZoneMinder/zmeventnotification), [mlapi](https://github.com/ZoneMinder/mlapi) and [PyZM](https://github.com/ZoneMinder/pyzm).
-- [@connortechnology](https://github.com/connortechnology) for their work on [ZoneMinder](https://zoneminder.com)
 
 # Prerequisites
 
@@ -61,8 +45,3 @@ The client grabs images, sends the images to a ZoMi ML API server, filters detec
 ## Install Script
 The [install script](examples/install.py) will install the client for you. It will also install the required python packages into its own venv.
 You can supply the script with options to configure the install. Below is a list of the options and their defaults.
-
-## Install Script Options
-
-- `--debug` : Enable debug logging
-- 

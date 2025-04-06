@@ -34,9 +34,9 @@ class PipeLine:
     current_frame: int = 1
 
     @staticmethod
-    def parse_response(response: bytes) -> Tuple[Optional[bytes], Optional[str]]:
+    def parse_response(response: bytes) -> Tuple[Optional[bytes], Optional[int], Optional[str]]:
         if response.startswith(b"\xff\xd8\xff"):
-            logger.debug(f"Response is a JPEG formatted image!")
+            #logger.debug(f"Response is a JPEG formatted image!")
             return response, f"mid_{g.mid}_rand_{random.randint(0,1000)}.jpg"
         else:
             logger.debug(f"Response is not a JPEG formatted image!")
@@ -120,21 +120,22 @@ class PipeLine:
             # (bytes, image_file_name)
             return (
                 image,
+                self.attempted_fids[-1],
                 img_name,
             )
         if end:
             logger.error(f"{lp} end has been called, no more images to process!")
-            return False, None
-        return None, None
+            return False, None, None
+        return None, None, None
 
     async def generate_image(
         self,
-    ) -> Generator[Tuple[Optional[Union[bytes, bool]], Optional[str]]]:
+    ) -> Generator[Tuple[Optional[Union[bytes, bool]], Optional[int], Optional[str]]]:
         """Generator to return images from the source"""
         while True:
             yield await self.get_image()
 
-    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[str]]:
+    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[int], Optional[str]]:
         pass
 
 
@@ -162,7 +163,7 @@ class APIImagePipeLine(PipeLine):
         self.max_attempts_delay = options.delay
         self.sbf: Optional[int] = self.options.sbf
         self.fps: Optional[int] = self.options.fps
-        self.skip_frames_calc: int = 0
+        self.skip_frames_calc: int = self.options.skip_frames
         self.event_end_datetime: str = ""
 
         # Alarm frame is always the first frame (the frame that kicked the event off)
@@ -176,13 +177,13 @@ class APIImagePipeLine(PipeLine):
         # pre- + post-buffers calculated as seconds because we are pulling <X> FPS
         self.total_max_frames = self.options.max_frames
 
-    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[str]]:
+    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[int], Optional[str]]:
         ret_img_name: str = ""
         if self.frames_attempted >= self.total_max_frames:
             logger.error(
                 f"max_frames ({self.total_max_frames}) has been reached, stopping!"
             )
-            return False, None
+            return False, None, None
 
         import aiohttp
 
@@ -480,10 +481,10 @@ class ZMSImagePipeLine(PipeLine):
                                 )
                 return image_from_resp
 
-    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[str]]:
+    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Options[int], Optional[str]]:
         if self.frames_attempted >= self.max_frames:
             logger.error(f"max_frames ({self.max_frames}) has been reached, stopping!")
-            return False, None
+            return False, None, None
 
         lp = f"{LP}ZMS:read:"
         timeout = self.options.timeout or 15

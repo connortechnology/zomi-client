@@ -308,8 +308,8 @@ class ZMNinja:
         key_: str = ""
         url: str = ""
         title: str = f"{g.mon_name} Alarm ({g.eid})"
-        zm_user: SecretStr = g.config.zoneminder.user
-        zm_pass: SecretStr = g.config.zoneminder.password
+        zm_user: SecretStr = g.config.zoneminder.api.user
+        zm_pass: SecretStr = g.config.zoneminder.api.password
         date_fmt: str = self.config.fcm.date_fmt
 
         fcm_log_message_id = self.config.fcm.log_message_id
