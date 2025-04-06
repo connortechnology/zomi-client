@@ -34,7 +34,7 @@ class PipeLine:
     current_frame: int = 1
 
     @staticmethod
-    def parse_response(response: bytes) -> Tuple[Optional[bytes], Optional[str]]:
+    def parse_response(response: bytes) -> Tuple[Optional[bytes], Optional[int], Optional[str]]:
         if response.startswith(b"\xff\xd8\xff"):
             #logger.debug(f"Response is a JPEG formatted image!")
             return response, f"mid_{g.mid}_rand_{random.randint(0,1000)}.jpg"
@@ -130,12 +130,12 @@ class PipeLine:
 
     async def generate_image(
         self,
-    ) -> Generator[Tuple[Optional[Union[bytes, bool]], Optional[str]]]:
+    ) -> Generator[Tuple[Optional[Union[bytes, bool]], Optional[int], Optional[str]]]:
         """Generator to return images from the source"""
         while True:
             yield await self.get_image()
 
-    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[str]]:
+    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[int], Optional[str]]:
         pass
 
 
@@ -177,7 +177,7 @@ class APIImagePipeLine(PipeLine):
         # pre- + post-buffers calculated as seconds because we are pulling <X> FPS
         self.total_max_frames = self.options.max_frames
 
-    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[str]]:
+    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[int], Optional[str]]:
         ret_img_name: str = ""
         if self.frames_attempted >= self.total_max_frames:
             logger.error(
@@ -481,7 +481,7 @@ class ZMSImagePipeLine(PipeLine):
                                 )
                 return image_from_resp
 
-    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Optional[str]]:
+    async def get_image(self) -> Tuple[Optional[Union[bytes, bool]], Options[int], Optional[str]]:
         if self.frames_attempted >= self.max_frames:
             logger.error(f"max_frames ({self.max_frames}) has been reached, stopping!")
             return False, None, None
